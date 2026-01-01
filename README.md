@@ -1,4 +1,4 @@
-# Meter
+# AI Meter
 
 See where your AI tokens actually go.
 
@@ -42,6 +42,7 @@ api_key="your-meter-key"
 
 )
 
+---
 
 Add attribution headers:
 
