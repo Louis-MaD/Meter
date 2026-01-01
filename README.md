@@ -36,17 +36,19 @@ Getting started
 
 Point your OpenAI client at Meter:
 
-client = OpenAI(
-base_url="https://api.meter.dev
-",
+client = OpenAI(base_url="https://api.meter.dev",
+
 api_key="your-meter-key"
+
 )
 
 
 Add attribution headers:
 
 x-team: support
+
 x-feature: ticket_summary
+
 x-environment: prod
 
 That’s it.
@@ -54,9 +56,13 @@ That’s it.
 ---
 
 Usage
+
 GET /usage
+
 GET /usage?group_by=feature
+
 GET /usage?group_by=team
+
 GET /usage?group_by=environment
 
 
