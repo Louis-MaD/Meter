@@ -198,7 +198,7 @@ def get_usage(group_by: str = None):
                     "request_count": row["request_count"],
                 })
 
-            return {"grouped_by": group_by, "results": results}
+            return JSONResponse(content={"grouped_by": group_by, "results": results}, indent=2)
 
         else:
             # Overall summary
@@ -214,13 +214,16 @@ def get_usage(group_by: str = None):
             cursor.execute(query)
             row = cursor.fetchone()
 
-            return {
-                "total_tokens_in": row["total_tokens_in"] or 0,
-                "total_tokens_out": row["total_tokens_out"] or 0,
-                "total_tokens": row["total_tokens"] or 0,
-                "total_cost": round(row["total_cost"] or 0, 6),
-                "request_count": row["request_count"] or 0,
-            }
+            return JSONResponse(
+                content={
+                    "total_tokens_in": row["total_tokens_in"] or 0,
+                    "total_tokens_out": row["total_tokens_out"] or 0,
+                    "total_tokens": row["total_tokens"] or 0,
+                    "total_cost": round(row["total_cost"] or 0, 6),
+                    "request_count": row["request_count"] or 0,
+                },
+                indent=2
+            )
 
 
 @app.get("/health")
