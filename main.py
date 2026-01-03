@@ -1,6 +1,7 @@
 import os
 import time
-from fastapi import FastAPI, Request, HTTPException, Header
+import json
+from fastapi import FastAPI, Request, HTTPException, Header, Response
 from fastapi.responses import StreamingResponse, JSONResponse
 import httpx
 from dotenv import load_dotenv
@@ -165,7 +166,7 @@ async def chat_completions(
 
 
 @app.get("/usage")
-def get_usage(group_by: str = None):
+def get_usage(group_by: str = None, pretty: bool = False):
     """Get usage statistics, optionally grouped by team, feature, or environment."""
     with get_db() as conn:
         cursor = conn.cursor()
@@ -198,7 +199,14 @@ def get_usage(group_by: str = None):
                     "request_count": row["request_count"],
                 })
 
-            return JSONResponse(content={"grouped_by": group_by, "results": results}, indent=2)
+            data = {"grouped_by": group_by, "results": results}
+
+            if pretty:
+                return Response(
+                    content=json.dumps(data, indent=2),
+                    media_type="application/json"
+                )
+            return data
 
         else:
             # Overall summary
@@ -214,16 +222,20 @@ def get_usage(group_by: str = None):
             cursor.execute(query)
             row = cursor.fetchone()
 
-            return JSONResponse(
-                content={
-                    "total_tokens_in": row["total_tokens_in"] or 0,
-                    "total_tokens_out": row["total_tokens_out"] or 0,
-                    "total_tokens": row["total_tokens"] or 0,
-                    "total_cost": round(row["total_cost"] or 0, 6),
-                    "request_count": row["request_count"] or 0,
-                },
-                indent=2
-            )
+            data = {
+                "total_tokens_in": row["total_tokens_in"] or 0,
+                "total_tokens_out": row["total_tokens_out"] or 0,
+                "total_tokens": row["total_tokens"] or 0,
+                "total_cost": round(row["total_cost"] or 0, 6),
+                "request_count": row["request_count"] or 0,
+            }
+
+            if pretty:
+                return Response(
+                    content=json.dumps(data, indent=2),
+                    media_type="application/json"
+                )
+            return data
 
 
 @app.get("/health")
