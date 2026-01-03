@@ -55,3 +55,23 @@ def get_db():
         yield conn
     finally:
         conn.close()
+
+
+def get_today_spend() -> float:
+    """Get total spend for today (UTC)."""
+    from datetime import datetime
+
+    today = datetime.utcnow().date().isoformat()
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT COALESCE(SUM(cost), 0) as total
+            FROM usage_logs
+            WHERE DATE(timestamp) = ?
+            """,
+            (today,)
+        )
+        row = cursor.fetchone()
+        return row["total"]

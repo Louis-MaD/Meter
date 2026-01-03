@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, HTTPException, Header
 from fastapi.responses import StreamingResponse, JSONResponse
 import httpx
 from dotenv import load_dotenv
-from database import init_db, get_db
+from database import init_db, get_db, get_today_spend
 from logger import log_usage
 
 load_dotenv()
@@ -14,6 +14,7 @@ app = FastAPI(title="Meter - AI Token Attribution Proxy")
 PROXY_API_KEY = os.getenv("PROXY_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+DAILY_SPEND_CAP = float(os.getenv("METER_DAILY_SPEND_CAP", "5.0"))
 
 if not PROXY_API_KEY:
     raise ValueError("PROXY_API_KEY environment variable is required")
@@ -49,6 +50,14 @@ async def chat_completions(
 ):
     """Proxy endpoint for OpenAI chat completions."""
     verify_api_key(authorization)
+
+    # Check daily spend cap
+    today_spend = get_today_spend()
+    if today_spend >= DAILY_SPEND_CAP:
+        raise HTTPException(
+            status_code=429,
+            detail={"error": "Meter daily spend cap reached. Requests temporarily disabled."}
+        )
 
     # Extract metadata with defaults
     team = x_team or "unknown"
