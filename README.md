@@ -1,4 +1,4 @@
-# AI Meter
+# Meter
 
 See where your AI tokens actually go.
 
